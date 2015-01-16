@@ -1,0 +1,35 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh" ng-app>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>title</title>
+
+    <link href="static/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="static/css/base.css" rel="stylesheet" />
+
+    <!--[if lt IE 9]>
+      <script src="static/js/html5shiv.min.js"></script>
+      <script src="static/js/respond.min.js"></script>
+    <![endif]-->
+    <script src="static/js/jquery-1.11.2.min.js"></script>
+    <script src="static/js/bootstrap.min.js"></script>
+    <script src="static/js/angular.min.js"></script>
+  </head>
+  <body ng-controller="ActivitiesListCtrl">
+  <h1>Today's activities</h1>
+  <ul>
+   <li ng-repeat="activity in activities">
+     {{activity.name}}
+   </li>
+  </ul>
+  </body>
+  <script>
+	function ActivitiesListCtrl($scope, $http) {
+		$http.get('ng/list').success(function(data) {
+			$scope.activities = data;
+		});
+	}
+  </script>
+</html>
