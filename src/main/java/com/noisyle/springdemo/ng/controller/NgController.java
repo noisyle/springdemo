@@ -18,13 +18,29 @@ public class NgController {
 	
 	@RequestMapping("/ng/list")
 	public @ResponseBody List hello(Model model) {
-		String str = "Wake up,Brush teeth,Shower,Have breakfast,Go to work,Write a Nettuts article,Go to the gym,Meet friends,Go to bed";
 		List list = new LinkedList();
-		for(String name:str.split(",")){
-			HashMap map = new HashMap();
-			map.put("name", name);
-			list.add(map);
-		}
+		HashMap map = null;
+		
+		map = new HashMap();
+		map.put("title", "asdf");
+		map.put("content", "aszxcvdf");
+		list.add(map);
+		
+		map = new HashMap();
+		map.put("title", "wert");
+		map.put("content", "xcvbes");
+		list.add(map);
+		
+		map = new HashMap();
+		map.put("title", "hugm");
+		map.put("content", "xfvbrt");
+		list.add(map);
+		
+		map = new HashMap();
+		map.put("title", "qzaa");
+		map.put("content", "bnytyt");
+		list.add(map);
+		
 		return list;
 	}
 }
