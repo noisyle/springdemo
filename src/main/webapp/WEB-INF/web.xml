@@ -20,5 +20,17 @@
 	<servlet-mapping>
         <servlet-name>default</servlet-name>
         <url-pattern>/demo/*</url-pattern>
+        
+	<!-- CometD配置开始 -->
     </servlet-mapping>
+        <servlet>
+        <servlet-name>cometd</servlet-name>
+        <servlet-class>org.cometd.server.CometDServlet</servlet-class>
+        <async-supported>true</async-supported>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>cometd</servlet-name>
+        <url-pattern>/cometd/*</url-pattern>
+    </servlet-mapping>
+	<!-- CometD配置结束 -->
 </web-app>
