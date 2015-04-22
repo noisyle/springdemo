@@ -34,7 +34,13 @@ public class HelloService {
 		String name = (String) input.get("name");
 
 		Map<String, Object> output = new HashMap<>();
+		
+		//发送单播消息
 		output.put("greeting", "你好，" + name);
 		remote.deliver(serverSession, "/hello", output);
+
+		//发送广播消息
+		output.put("greeting", name + " 进入聊天室");
+		bayeux.getChannel("/hello").publish(remote, output);
 	}
 }
