@@ -10,4 +10,9 @@ public class ChatController {
 	public String index(Model model) {
 		return "chat/index";
 	}
+	
+	@RequestMapping("/chat/test")
+	public String text(Model model) {
+		return "chat/test";
+	}
 }

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>chat</title>
+
+    <link th:href="@{/static/bootstrap/css/bootstrap.min.css}" rel="stylesheet" />
+
+    <!--[if lt IE 9]>
+      <script th:src="@{/static/html5shiv.min.js}"></script>
+      <script th:src="@{/static/respond.min.js}"></script>
+    <![endif]-->
+    
+    <style>
+    </style>
+    <script th:inline="javascript">
+        var config = {
+            contextPath: /*[[${#httpServletRequest.getContextPath()}]]*/ ''
+        };
+    </script>
+</head>
+<body>
+	<input type="text" id="msg" /><button id="send">send</button>
+    <div id="body"></div>
+    
+    
+    <script th:src="@{/static/jquery/jquery-1.11.2.min.js}"></script>
+    <script th:src="@{/static/bootstrap/js/bootstrap.min.js}"></script>
+    <script th:src="@{/static/cometd/cometd.js}"></script>
+    <script th:src="@{/static/cometd/jquery.cometd.js}"></script>
+    <script th:src="@{/static/site/js/chat.js}"></script>
+</body>
+</html>
