@@ -221,20 +221,20 @@
         <section class="content">
 
           <!-- Default box -->
-          <div class="box box-primary direct-chat direct-chat-primary">
+          <div id="msg_box" class="box box-primary direct-chat direct-chat-primary" style="margin-bottom:0px;">
             <div class="box-header with-border">
               <h3 class="box-title">Direct Chat</h3>
               <div class="box-tools pull-right">
                 <button class="btn btn-box-tool" data-toggle="tooltip" title="" data-widget="chat-pane-toggle" data-original-title="History"><i class="fa fa-comments"></i></button>
               </div>
             </div><!-- /.box-header -->
-            <div class="box-body" style="display: block;">
+            <div id="msg_wrapper" class="box-body" style="display: block;">
               <!-- Conversations are loaded here -->
-              <div id="messages" class="direct-chat-messages" style="height: auto;"></div>
+              <div id="msg_div" class="direct-chat-messages" style="height: auto;"></div>
 
 
             </div><!-- /.box-body -->
-            <div class="box-footer" style="display: block; position: absolute; bottom: 16px;">
+            <div class="box-footer" style="display: block; position: absolute; bottom: 6px;">
               <form action="#" method="post">
                 <div class="input-group">
                   <input type="text" id="msg" name="message" placeholder="请输入信息 ..." class="form-control">
@@ -342,7 +342,9 @@
         var neg = $('.main-header').outerHeight() + $('.main-footer').outerHeight();
         var window_height = $(window).height();
         $(".content-wrapper>.content").css('min-height', window_height - neg);
-        $(".content>.box").css('min-height', window_height - neg - 56);
+        $("#msg_box").css('height', window_height - neg - 30);
+        $("#msg_wrapper").css('max-height', window_height - neg - 30 - 100);
+		scrollMsg();
     }
     
     function appendMsg(message){
@@ -357,7 +359,16 @@
 			message.data.name +
 			'  </div>' +
 			'</div>';
-		$("#messages").append(html);
+		$("#msg_div").append(html);
+		scrollMsg();
+    }
+    
+    function scrollMsg(){
+		var h_div = $("#msg_div").outerHeight();
+		var h_wrapper = $("#msg_wrapper").height();
+		if(h_div>h_wrapper){
+			$("#msg_wrapper").scrollTop(h_div-h_wrapper)
+		}
     }
     </script>
   </body>
