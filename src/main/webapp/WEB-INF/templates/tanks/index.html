@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Tanks</title>
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+  </head>
+  <body>
+  	<div id="game"></div>
+  </body>
+   <script th:inline="javascript">
+       var contextPath = /*[[${#httpServletRequest.getContextPath()}]]*/ '';
+   </script>
+  <script th:src="@{/static/phaser/phaser.min.js}"></script>
+  <script th:src="@{/static/site/js/tanks.js}"></script>
+</html>
