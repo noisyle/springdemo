@@ -1,15 +1,12 @@
+EnemyTank = function (index, game, player, startX, startY) {
 
-EnemyTank = function (index, game, player, bullets) {
-
-    var x = game.world.randomX;
-    var y = game.world.randomY;
+	var x = startX;
+    var y = startY;
+    this.lastPos = {x:x,y:y};
 
     this.game = game;
     this.health = 3;
     this.player = player;
-    this.bullets = bullets;
-    this.fireRate = 1000;
-    this.nextFire = 0;
     this.alive = true;
 
     this.shadow = game.add.sprite(x, y, 'enemy', 'shadow');
@@ -32,26 +29,10 @@ EnemyTank = function (index, game, player, bullets) {
 
 };
 
-EnemyTank.prototype.damage = function() {
-
-    this.health -= 1;
-
-    if (this.health <= 0)
-    {
-        this.alive = false;
-
-        this.shadow.kill();
-        this.tank.kill();
-        this.turret.kill();
-
-        return true;
-    }
-
-    return false;
-
-}
-
 EnemyTank.prototype.update = function() {
+	if(this.tank.x != this.lastPos.x || this.tank.y != this.lastPos.y) {
+        this.tank.rotation = Math.PI + game.physics.angleToXY(this.tank, this.lastPos.x, this.lastPos.y);
+    }
 
     this.shadow.x = this.tank.x;
     this.shadow.y = this.tank.y;
@@ -60,36 +41,26 @@ EnemyTank.prototype.update = function() {
     this.turret.x = this.tank.x;
     this.turret.y = this.tank.y;
     this.turret.rotation = this.game.physics.arcade.angleBetween(this.tank, this.player);
-
-    if (this.game.physics.arcade.distanceBetween(this.tank, this.player) < 300)
-    {
-        if (this.game.time.now > this.nextFire && this.bullets.countDead() > 0)
-        {
-            this.nextFire = this.game.time.now + this.fireRate;
-
-            var bullet = this.bullets.getFirstDead();
-
-            bullet.reset(this.turret.x, this.turret.y);
-
-            bullet.rotation = this.game.physics.arcade.moveToObject(bullet, this.player, 500);
-        }
-    }
-
 };
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update, render: render });
 
 function preload () {
-	
     game.load.atlas('tank', contextPath+'/static/site/image/tanks/tanks.png', contextPath+'/static/site/image/tanks/tanks.json');
     game.load.atlas('enemy', contextPath+'/static/site/image/tanks/enemy-tanks.png', contextPath+'/static/site/image/tanks/tanks.json');
     game.load.image('logo', contextPath+'/static/site/image/tanks/logo.png');
     game.load.image('bullet', contextPath+'/static/site/image/tanks/bullet.png');
     game.load.image('earth', contextPath+'/static/site/image/tanks/scorched_earth.png');
     game.load.spritesheet('kaboom', contextPath+'/static/site/image/tanks/explosion.png', 64, 64, 23);
-    
 }
 
+var cometd = $.cometd;
+cometd.configure({
+    url: location.protocol + "//" + location.host + contextPath + "/cometd"
+});
+cometd.addListener('/meta/handshake', _metaHandshake);
+cometd.handshake();
+
+var game;
 var land;
 
 var shadow;
@@ -97,31 +68,23 @@ var tank;
 var turret;
 
 var enemies;
-var enemyBullets;
-var enemiesTotal = 0;
-var enemiesAlive = 0;
-var explosions;
-
-var logo;
 
 var currentSpeed = 0;
 var cursors;
 
-var bullets;
-var fireRate = 100;
-var nextFire = 0;
-
 function create () {
 
     //  Resize our game world to be a 2000 x 2000 square
-    game.world.setBounds(-1000, -1000, 2000, 2000);
+    game.world.setBounds(-500, -500, 1500, 1500);
 
     //  Our tiled scrolling background
     land = game.add.tileSprite(0, 0, 800, 600, 'earth');
     land.fixedToCamera = true;
 
     //  The base of our tank
-    tank = game.add.sprite(0, 0, 'tank', 'tank1');
+    var x = game.world.randomX;
+    var y = game.world.randomY;
+    tank = game.add.sprite(x, y, 'tank', 'tank1');
     tank.anchor.setTo(0.5, 0.5);
     tank.animations.add('move', ['tank1', 'tank2', 'tank3', 'tank4', 'tank5', 'tank6'], 20, true);
 
@@ -135,92 +98,101 @@ function create () {
     turret = game.add.sprite(0, 0, 'tank', 'turret');
     turret.anchor.setTo(0.3, 0.5);
 
-    //  The enemies bullet group
-    enemyBullets = game.add.group();
-    enemyBullets.enableBody = true;
-    enemyBullets.physicsBodyType = Phaser.Physics.ARCADE;
-    enemyBullets.createMultiple(100, 'bullet');
-    
-    enemyBullets.setAll('anchor.x', 0.5);
-    enemyBullets.setAll('anchor.y', 0.5);
-    enemyBullets.setAll('outOfBoundsKill', true);
-    enemyBullets.setAll('checkWorldBounds', true);
-
     //  Create some baddies to waste :)
     enemies = [];
-
-    enemiesTotal = 20;
-    enemiesAlive = 20;
-
-    for (var i = 0; i < enemiesTotal; i++)
-    {
-        enemies.push(new EnemyTank(i, game, tank, enemyBullets));
-    }
 
     //  A shadow below our tank
     shadow = game.add.sprite(0, 0, 'tank', 'shadow');
     shadow.anchor.setTo(0.5, 0.5);
 
-    //  Our bullet group
-    bullets = game.add.group();
-    bullets.enableBody = true;
-    bullets.physicsBodyType = Phaser.Physics.ARCADE;
-    bullets.createMultiple(30, 'bullet', 0, false);
-    bullets.setAll('anchor.x', 0.5);
-    bullets.setAll('anchor.y', 0.5);
-    bullets.setAll('outOfBoundsKill', true);
-    bullets.setAll('checkWorldBounds', true);
-
-    //  Explosion pool
-    explosions = game.add.group();
-
-    for (var i = 0; i < 10; i++)
-    {
-        var explosionAnimation = explosions.create(0, 0, 'kaboom', [0], false);
-        explosionAnimation.anchor.setTo(0.5, 0.5);
-        explosionAnimation.animations.add('kaboom');
-    }
-
     tank.bringToTop();
     turret.bringToTop();
-
-    logo = game.add.sprite(0, 200, 'logo');
-    logo.fixedToCamera = true;
-
-    game.input.onDown.add(removeLogo, this);
 
     game.camera.follow(tank);
     game.camera.deadzone = new Phaser.Rectangle(150, 150, 500, 300);
     game.camera.focusOnXY(0, 0);
 
     cursors = game.input.keyboard.createCursorKeys();
+    
+	cometd.batch(function(){
+        // Publish on a service channel since the message is for the server only
+    	onSocketConnected();
+//        cometd.subscribe('/tanks/newplayer', onNewPlayer);
+//        cometd.subscribe('/tanks/moveplayer', onMovePlayer);
+//        cometd.subscribe('/tanks/removeplayer', onRemovePlayer);
+    });
 
 }
-
-function removeLogo () {
-
-    game.input.onDown.remove(removeLogo, this);
-    logo.kill();
-
+// Function invoked when first contacting the server and
+// when the server has lost the state of this client
+function _metaHandshake(handshake)
+{
+    if (handshake.successful === true)
+    {
+    	game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update, render: render });
+    }
 }
+// Socket connected
+function onSocketConnected() {
+    console.log("Connected to socket server");
+    // Send local player data to the game server
+    cometd.publish('/tanks/newplayer', {x: tank.x, y:tank.y});
+};
+// Socket disconnected
+function onSocketDisconnect() {
+    console.log("Disconnected from socket server");
+};
+// New player
+function onNewPlayer(data) {
+    console.log("New player connected: "+data.id);
+    // Add new player to the remote players array
+    enemies.push(new EnemyTank(data.id, game, tank, data.x, data.y));
+};
+// Move player
+function onMovePlayer(data) {
+    var movePlayer = playerById(data.id);
+    // Player not found
+    if (!movePlayer) {
+        console.log("Player not found: "+data.id);
+        return;
+    };
+    // Update player position
+    movePlayer.tank.x = data.x;
+    movePlayer.tank.y = data.y;
+};
+// Remove player
+function onRemovePlayer(data) {
+    var removePlayer = playerById(data.id);
+    // Player not found
+    if (!removePlayer) {
+        console.log("Player not found: "+data.id);
+        return;
+    };
+    removePlayer.shadow.kill();
+    removePlayer.tank.kill();
+    removePlayer.turret.kill();
+    // Remove player from array
+    enemies.splice(enemies.indexOf(removePlayer), 1);
+};
+//Find player by ID
+function playerById(id) {
+    var i;
+    for (i = 0; i < enemies.length; i++) {
+        if (enemies[i].tank.name == id)
+            return enemies[i];
+    };
+    return false;
+};
 
 function update () {
-
-    game.physics.arcade.overlap(enemyBullets, tank, bulletHitPlayer, null, this);
-
-    enemiesAlive = 0;
-
-    for (var i = 0; i < enemies.length; i++)
+	for (var i = 0; i < enemies.length; i++)
     {
         if (enemies[i].alive)
         {
-            enemiesAlive++;
-            game.physics.arcade.collide(tank, enemies[i].tank);
-            game.physics.arcade.overlap(bullets, enemies[i].tank, bulletHitEnemy, null, this);
             enemies[i].update();
+            game.physics.collide(tank, enemies[i].player);
         }
     }
-
     if (cursors.left.isDown)
     {
         tank.angle -= 4;
@@ -260,55 +232,14 @@ function update () {
     turret.y = tank.y;
 
     turret.rotation = game.physics.arcade.angleToPointer(turret);
-
-    if (game.input.activePointer.isDown)
-    {
-        //  Boom!
-        fire();
-    }
-
-}
-
-function bulletHitPlayer (tank, bullet) {
-
-    bullet.kill();
-
-}
-
-function bulletHitEnemy (tank, bullet) {
-
-    bullet.kill();
-
-    var destroyed = enemies[tank.name].damage();
-
-    if (destroyed)
-    {
-        var explosionAnimation = explosions.getFirstExists(false);
-        explosionAnimation.reset(tank.x, tank.y);
-        explosionAnimation.play('kaboom', 30, false, true);
-    }
-
-}
-
-function fire () {
-
-    if (game.time.now > nextFire && bullets.countDead() > 0)
-    {
-        nextFire = game.time.now + fireRate;
-
-        var bullet = bullets.getFirstExists(false);
-
-        bullet.reset(turret.x, turret.y);
-
-        bullet.rotation = game.physics.arcade.moveToPointer(bullet, 1000, game.input.activePointer, 500);
-    }
-
+    
+    cometd.publish('/tanks/moveplayer', {x: tank.x, y:tank.y});
 }
 
 function render () {
 
-    // game.debug.text('Active Bullets: ' + bullets.countLiving() + ' / ' + bullets.length, 32, 32);
-    game.debug.text('Enemies: ' + enemiesAlive + ' / ' + enemiesTotal, 32, 32);
-
 }
 
+$(window).unload(function(){
+    cometd.disconnect(true);
+});

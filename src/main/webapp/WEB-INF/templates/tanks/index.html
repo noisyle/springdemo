@@ -8,9 +8,12 @@
   <body>
   	<div id="game"></div>
   </body>
-   <script th:inline="javascript">
-       var contextPath = /*[[${#httpServletRequest.getContextPath()}]]*/ '';
-   </script>
+  <script th:inline="javascript">
+      var contextPath = /*[[${#httpServletRequest.getContextPath()}]]*/ '';
+  </script>
+  <script th:src="@{/static/jquery/jquery-1.11.2.min.js}"></script>
+  <script th:src="@{/static/cometd/cometd.js}"></script>
+  <script th:src="@{/static/cometd/jquery.cometd.js}"></script>
   <script th:src="@{/static/phaser/phaser.min.js}"></script>
   <script th:src="@{/static/site/js/tanks.js}"></script>
 </html>
