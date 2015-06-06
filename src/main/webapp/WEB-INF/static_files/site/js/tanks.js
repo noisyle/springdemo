@@ -1,11 +1,11 @@
-EnemyTank = function (index, game, player, startX, startY) {
-
-	var x = startX;
-    var y = startY;
-    this.lastPos = {x:x,y:y};
+EnemyTank = function (clientId, game, player, x, y) {
+	this.x = x;
+    this.y = y;
+    this.rotation = 0;
+    this.turret_rotation = 0;
 
     this.game = game;
-    this.health = 3;
+    this.health = 10;
     this.player = player;
     this.alive = true;
 
@@ -17,30 +17,27 @@ EnemyTank = function (index, game, player, startX, startY) {
     this.tank.anchor.set(0.5);
     this.turret.anchor.set(0.3, 0.5);
 
-    this.tank.name = index.toString();
+    this.tank.name = clientId;
     game.physics.enable(this.tank, Phaser.Physics.ARCADE);
     this.tank.body.immovable = false;
     this.tank.body.collideWorldBounds = true;
     this.tank.body.bounce.setTo(1, 1);
 
-    this.tank.angle = game.rnd.angle();
-
-    game.physics.arcade.velocityFromRotation(this.tank.rotation, 100, this.tank.body.velocity);
-
+    game.physics.arcade.velocityFromRotation(this.tank.rotation, 0, this.tank.body.velocity);
 };
 
 EnemyTank.prototype.update = function() {
-	if(this.tank.x != this.lastPos.x || this.tank.y != this.lastPos.y) {
-        this.tank.rotation = Math.PI + game.physics.angleToXY(this.tank, this.lastPos.x, this.lastPos.y);
-    }
+    this.shadow.x = this.x;
+    this.shadow.y = this.y;
+    this.shadow.rotation = this.rotation;
+    
+    this.tank.x = this.x;
+    this.tank.y = this.y;
+    this.tank.rotation = this.rotation;
 
-    this.shadow.x = this.tank.x;
-    this.shadow.y = this.tank.y;
-    this.shadow.rotation = this.tank.rotation;
-
-    this.turret.x = this.tank.x;
-    this.turret.y = this.tank.y;
-    this.turret.rotation = this.game.physics.arcade.angleBetween(this.tank, this.player);
+    this.turret.x = this.x;
+    this.turret.y = this.y;
+    this.turret.rotation = this.turret_rotation;
 };
 
 
@@ -53,29 +50,9 @@ function preload () {
     game.load.spritesheet('kaboom', contextPath+'/static/site/image/tanks/explosion.png', 64, 64, 23);
 }
 
-var cometd = $.cometd;
-cometd.configure({
-    url: location.protocol + "//" + location.host + contextPath + "/cometd"
-});
-cometd.addListener('/meta/handshake', _metaHandshake);
-cometd.handshake();
-
-var game;
-var land;
-
-var shadow;
-var tank;
-var turret;
-
-var enemies;
-
-var currentSpeed = 0;
-var cursors;
-
 function create () {
-
     //  Resize our game world to be a 2000 x 2000 square
-    game.world.setBounds(-500, -500, 1500, 1500);
+    game.world.setBounds(0, 0, 800, 600);
 
     //  Our tiled scrolling background
     land = game.add.tileSprite(0, 0, 800, 600, 'earth');
@@ -117,55 +94,93 @@ function create () {
 	cometd.batch(function(){
         // Publish on a service channel since the message is for the server only
     	onSocketConnected();
-//        cometd.subscribe('/tanks/newplayer', onNewPlayer);
-//        cometd.subscribe('/tanks/moveplayer', onMovePlayer);
-//        cometd.subscribe('/tanks/removeplayer', onRemovePlayer);
+        cometd.subscribe('/tanks', eventHandler);
+        cometd.subscribe('/tanks/echo', onEcho);
     });
 
 }
+
+//Function that manages the connection status with the Bayeux server
+var _connected = false;
+function _metaConnect(message) {
+    if (cometd.isDisconnected()) {
+        _connected = false;
+        return;
+    }
+    _connected = message.successful === true;
+}
+
 // Function invoked when first contacting the server and
 // when the server has lost the state of this client
-function _metaHandshake(handshake)
-{
-    if (handshake.successful === true)
-    {
-    	game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update, render: render });
+function _metaHandshake(handshake) {
+    if (handshake.successful === true) {
+    	id = handshake.clientId;
+    	if (!game) {
+    		game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update, render: render });
+    	}
     }
 }
 // Socket connected
 function onSocketConnected() {
     console.log("Connected to socket server");
     // Send local player data to the game server
-    cometd.publish('/tanks/newplayer', {x: tank.x, y:tank.y});
+    cometd.publish('/service/tanks', {type: 'new', x: tank.x, y:tank.y});
 };
 // Socket disconnected
 function onSocketDisconnect() {
     console.log("Disconnected from socket server");
 };
+
+function onEcho(msg) {
+	var clientList = msg.data;
+	for(var i in clientList){
+		enemies.push(new EnemyTank(clientList[i].id, game, tank, clientList[i].x, clientList[i].y));
+	}
+};
+function eventHandler(msg) {
+	switch (msg.data.type) {
+	case 'new':
+		onNewPlayer(msg);
+		break;
+	case 'move':
+		onMovePlayer(msg);
+		break;
+	case 'remove':
+		onRemovePlayer(msg);
+		break;
+	default:
+		break;
+	}
+};
 // New player
-function onNewPlayer(data) {
-    console.log("New player connected: "+data.id);
-    // Add new player to the remote players array
-    enemies.push(new EnemyTank(data.id, game, tank, data.x, data.y));
+function onNewPlayer(msg) {
+	if(id == msg.data.id) return;
+	console.log("New player connected: "+msg.data.id);
+	// Add new player to the remote players array
+	enemies.push(new EnemyTank(msg.data.id, game, tank, msg.data.x, msg.data.y));
 };
 // Move player
-function onMovePlayer(data) {
-    var movePlayer = playerById(data.id);
+function onMovePlayer(msg) {
+	if(id == msg.data.id) return;
+    var movePlayer = playerById(msg.data.id);
     // Player not found
     if (!movePlayer) {
-        console.log("Player not found: "+data.id);
+        console.log("Player not found: "+msg.data.id);
         return;
     };
     // Update player position
-    movePlayer.tank.x = data.x;
-    movePlayer.tank.y = data.y;
+    movePlayer.x = msg.data.x;
+    movePlayer.y = msg.data.y;
+    movePlayer.rotation = msg.data.rotation;
+    movePlayer.turret_rotation = msg.data.turret_rotation;
 };
 // Remove player
-function onRemovePlayer(data) {
-    var removePlayer = playerById(data.id);
+function onRemovePlayer(msg) {
+	if(id == msg.data.id) return;
+    var removePlayer = playerById(msg.data.id);
     // Player not found
     if (!removePlayer) {
-        console.log("Player not found: "+data.id);
+        console.log("Player not found: "+msg.data.id);
         return;
     };
     removePlayer.shadow.kill();
@@ -185,39 +200,31 @@ function playerById(id) {
 };
 
 function update () {
-	for (var i = 0; i < enemies.length; i++)
-    {
-        if (enemies[i].alive)
-        {
+	for (var i = 0; i < enemies.length; i++) {
+        if (enemies[i].alive) {
+            game.physics.arcade.collide(tank, enemies[i].tank);
             enemies[i].update();
-            game.physics.collide(tank, enemies[i].player);
         }
     }
-    if (cursors.left.isDown)
-    {
+    if (cursors.left.isDown) {
         tank.angle -= 4;
-    }
-    else if (cursors.right.isDown)
-    {
+    } else if (cursors.right.isDown) {
         tank.angle += 4;
     }
 
-    if (cursors.up.isDown)
-    {
+    if (cursors.up.isDown) {
         //  The speed we'll travel at
         currentSpeed = 300;
-    }
-    else
-    {
-        if (currentSpeed > 0)
-        {
+    } else {
+        if (currentSpeed > 0) {
             currentSpeed -= 4;
         }
     }
 
-    if (currentSpeed > 0)
-    {
+    if (currentSpeed > 0) {
         game.physics.arcade.velocityFromRotation(tank.rotation, currentSpeed, tank.body.velocity);
+    } else {
+    	tank.body.velocity.x = tank.body.velocity.y = 0;
     }
 
     land.tilePosition.x = -game.camera.x;
@@ -230,10 +237,12 @@ function update () {
 
     turret.x = tank.x;
     turret.y = tank.y;
-
     turret.rotation = game.physics.arcade.angleToPointer(turret);
     
-    cometd.publish('/tanks/moveplayer', {x: tank.x, y:tank.y});
+    if(lastPos.x!=tank.x || lastPos.y!=tank.y || lastPos.rotation!=tank.rotation || lastPos.turret_rotation!=turret.rotation){
+    	cometd.publish('/service/tanks', {type: 'move', id: id, x: tank.x, y:tank.y, rotation:tank.rotation, turret_rotation:turret.rotation});
+    	lastPos = {x:tank.x,y:tank.y,rotation:tank.rotation,turret_rotation:turret.rotation};
+    }
 }
 
 function render () {
@@ -241,5 +250,31 @@ function render () {
 }
 
 $(window).unload(function(){
+    cometd.publish('/service/tanks', {type: 'remove', id: id});
     cometd.disconnect(true);
 });
+
+
+var game;
+var land;
+
+var id;
+var shadow;
+var tank;
+var turret;
+var lastPos = {x:0,y:0,rotation:0,turret_rotation:0};
+
+var enemies;
+
+var currentSpeed = 0;
+var cursors;
+
+
+var cometd = $.cometd;
+cometd.configure({
+    url: location.protocol + "//" + location.host + contextPath + "/cometd"
+});
+cometd.addListener('/meta/handshake', _metaHandshake);
+cometd.addListener('/meta/connect', _metaConnect);
+cometd.handshake();
+
