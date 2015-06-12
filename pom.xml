@@ -85,8 +85,14 @@
 			<version>1.7.10</version>
 		</dependency>
 	</dependencies>
+
 	<build>
 		<finalName>springdemo</finalName>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
