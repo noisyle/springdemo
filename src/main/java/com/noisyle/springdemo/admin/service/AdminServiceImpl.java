@@ -14,4 +14,8 @@ public class AdminServiceImpl implements AdminService {
 	public User getUser() {
 		return userDao.getUser();
 	}
+	
+	public void init() {
+		userDao.init();
+	}
 }
