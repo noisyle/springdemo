@@ -12,7 +12,7 @@
 
 	<mvc:resources mapping="/static/**" location="/WEB-INF/static_files/" />
 	<mvc:annotation-driven />
-	<context:component-scan base-package="com.noisyle.springdemo" />
+	<context:component-scan base-package="com.noisyle.springdemo.**.controller" />
 
 	<!-- Thymeleaf模板设置 -->
 	<bean id="templateResolver"
