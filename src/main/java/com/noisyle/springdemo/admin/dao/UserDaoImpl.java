@@ -12,11 +12,12 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
 
 import com.noisyle.springdemo.admin.entity.User;
-import com.noisyle.springdemo.util.SpringContextHolder;
+import com.noisyle.springdemo.common.exception.DAOException;
+import com.noisyle.springdemo.common.util.SpringContextHolder;
 
 @Repository("userDao")
 public class UserDaoImpl implements UserDao {
-	public User getUser() {
+	public User getUser() throws DAOException {
 		User user = new User();
 		DataSource ds = null;
 		Connection conn = null;
@@ -37,14 +38,13 @@ public class UserDaoImpl implements UserDao {
 			rs.close();
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DAOException("查询失败", e);
 		} finally {
-			DataSourceUtils.releaseConnection(conn, ds);
 		}
 		return user;
 	}
 	
-	public void init() {
+	public void init() throws DAOException {
 		DataSource ds = null;
 		Connection conn = null;
 		PreparedStatement ps = null;
@@ -58,17 +58,17 @@ public class UserDaoImpl implements UserDao {
 				ps.execute();
 			} catch (Exception e) {
 			}
-			
 			ps = conn.prepareStatement("create table demo_user(id varchar, name varchar, loginname varchar, password varchar)");
 			ps.execute();
 			ps = conn.prepareStatement("insert into demo_user values ('1','管理员1','admin1','123456')");
 			ps.execute();
+			ps = conn.prepareStatement("insert into demo_user values ('2','管理员2','admin2','123456')");
+			ps.execute();
 			
 			ps.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new DAOException("保存失败", e);
 		} finally {
-			DataSourceUtils.releaseConnection(conn, ds);
 		}
 	}
 	

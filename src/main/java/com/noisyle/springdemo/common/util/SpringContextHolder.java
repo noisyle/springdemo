@@ -1,4 +1,4 @@
-package com.noisyle.springdemo.util;
+package com.noisyle.springdemo.common.util;
 
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
