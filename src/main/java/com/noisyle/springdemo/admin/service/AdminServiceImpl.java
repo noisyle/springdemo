@@ -1,11 +1,11 @@
 package com.noisyle.springdemo.admin.service;
 
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.noisyle.springdemo.admin.dao.UserDao;
 import com.noisyle.springdemo.admin.entity.User;
+import com.noisyle.springdemo.common.exception.ServiceException;
 
 @Service("adminService")
 public class AdminServiceImpl implements AdminService {
@@ -22,10 +22,10 @@ public class AdminServiceImpl implements AdminService {
 	
 	public void init() {
 		try {
-			LoggerFactory.getLogger(this.getClass()).warn("userDao:"+userDao.toString());
 			userDao.init();
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new ServiceException("操作失败", e);
 		}
 	}
 }

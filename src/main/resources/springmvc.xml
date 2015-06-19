@@ -34,4 +34,12 @@
 	</bean>
 	<!-- Thymeleaf模板设置 -->
 
+	<!-- 拦截器设置 -->
+	<mvc:interceptors>
+		<!-- Controller拦截器 -->
+		<bean class="com.noisyle.springdemo.common.web.WebHandlerInterceptor" />
+	</mvc:interceptors>
+	
+	<!-- Controller产生异常后通用处理 -->
+	<bean id="webExceptionResolver" class="com.noisyle.springdemo.common.web.WebExceptionResolver"/>
 </beans>

@@ -7,7 +7,6 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
 
@@ -17,7 +16,7 @@ import com.noisyle.springdemo.common.util.SpringContextHolder;
 
 @Repository("userDao")
 public class UserDaoImpl implements UserDao {
-	public User getUser() throws DAOException {
+	public User getUser() {
 		User user = new User();
 		DataSource ds = null;
 		Connection conn = null;
@@ -44,14 +43,13 @@ public class UserDaoImpl implements UserDao {
 		return user;
 	}
 	
-	public void init() throws DAOException {
+	public void init() {
 		DataSource ds = null;
 		Connection conn = null;
 		PreparedStatement ps = null;
 		try {
 			ds = SpringContextHolder.getBean("dataSource");
 			conn = DataSourceUtils.getConnection(ds);
-			LoggerFactory.getLogger(this.getClass()).warn("1:"+conn.toString());
 			
 			try {
 				ps = conn.prepareStatement("drop table demo_user");
@@ -62,7 +60,7 @@ public class UserDaoImpl implements UserDao {
 			ps.execute();
 			ps = conn.prepareStatement("insert into demo_user values ('1','管理员1','admin1','123456')");
 			ps.execute();
-			ps = conn.prepareStatement("insert into demo_user values ('2','管理员2','admin2','123456')");
+			ps = conn.prepareStatement("insert into demo_user values1 ('2','管理员2','admin2','123456')");
 			ps.execute();
 			
 			ps.close();
