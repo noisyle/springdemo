@@ -60,7 +60,7 @@ public class UserDaoImpl implements UserDao {
 			ps.execute();
 			ps = conn.prepareStatement("insert into demo_user values ('1','管理员1','admin1','123456')");
 			ps.execute();
-			ps = conn.prepareStatement("insert into demo_user values1 ('2','管理员2','admin2','123456')");
+			ps = conn.prepareStatement("insert into demo_user values ('2','管理员2','admin2','123456')");
 			ps.execute();
 			
 			ps.close();

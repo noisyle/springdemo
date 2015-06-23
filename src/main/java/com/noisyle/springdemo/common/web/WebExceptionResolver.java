@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -17,19 +19,21 @@ public class WebExceptionResolver implements HandlerExceptionResolver {
 
 	final private static Logger logger = LoggerFactory.getLogger(WebExceptionResolver.class);
 
-	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object object, Exception ex) {
+	public ModelAndView resolveException(HttpServletRequest request, HttpServletResponse response, Object object,
+			Exception ex) {
 
 		String uri = request.getRequestURI().toLowerCase();
 		logger.debug("url:{} 拦截到异常:{}", uri, ex);
-		
-		if (uri.endsWith(".json")) {
+		HandlerMethod method = (HandlerMethod) object;
+		ResponseBody annotation = method.getMethodAnnotation(ResponseBody.class);
+		if (annotation!=null) {
 
 			response.resetBuffer();
 			response.setContentType("text/html; charset=UTF-8");
 			response.setHeader("Pragma", "no-cache");
 			response.setHeader("Cache-Control", "no-cache, must-revalidate");
 			Writer writer = null;
-			
+
 			ResponseMessage msg = new ResponseMessage();
 			msg.setErrorMessage(ex.getMessage());
 
@@ -52,7 +56,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver {
 			ModelAndView model = new ModelAndView();
 			model.setViewName("admin/index"); // TODO 添加错误页面
 			model.addObject("e", ex);
-			
+
 			return model;
 		}
 	}
