@@ -2,11 +2,12 @@ package com.noisyle.springdemo.admin.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Repository;
 
@@ -16,30 +17,12 @@ import com.noisyle.springdemo.common.util.SpringContextHolder;
 
 @Repository("userDao")
 public class UserDaoImpl implements UserDao {
+	@Autowired
+	private SqlSessionTemplate sqlSessionTemplate;
+	
 	public User getUser() {
-		User user = new User();
-		DataSource ds = null;
-		Connection conn = null;
-		PreparedStatement ps;
-		ResultSet rs;
-		try {
-			ds = SpringContextHolder.getBean("dataSource");
-			conn = DataSourceUtils.getConnection(ds);
-			
-			ps = conn.prepareStatement("select * from demo_user where id = ?");
-			ps.setString(1, "1");
-			rs = ps.executeQuery();
-			user.setId(rs.getString("ID"));
-			user.setName(rs.getString("NAME"));
-			user.setLoginname(rs.getString("LOGINNAME"));
-			user.setPassword(rs.getString("PASSWORD"));
-			
-			rs.close();
-			ps.close();
-		} catch (SQLException e) {
-			throw new DAOException("查询失败", e);
-		} finally {
-		}
+		User user = (User) sqlSessionTemplate.selectOne("com.noisyle.springdemo.admin.entity.User.get", 1);
+		System.out.println(user);
 		return user;
 	}
 	

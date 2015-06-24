@@ -13,11 +13,7 @@ public class AdminServiceImpl implements AdminService {
 	private UserDao userDao;
 	
 	public User getUser() {
-		try {
-			return userDao.getUser();
-		} catch (Exception e) {
-			return null;
-		}
+		return userDao.getUser();
 	}
 	
 	public void init() {

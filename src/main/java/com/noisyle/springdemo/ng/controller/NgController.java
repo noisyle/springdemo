@@ -9,18 +9,20 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.noisyle.springdemo.common.web.AbstractController;
+
 @Controller
-public class NgController {
+public class NgController extends AbstractController {
 	@RequestMapping("/ng")
 	public String index(Model model) {
 		return "ng/test";
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@RequestMapping("/ng/list")
 	public @ResponseBody List hello(Model model) {
 		List list = new LinkedList();
 		HashMap map = null;
-		
 		map = new HashMap();
 		map.put("title", "asdf");
 		map.put("content", "aszxcvdf");

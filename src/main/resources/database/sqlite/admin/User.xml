@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.noisyle.springdemo.admin.entity.User">
+	<!-- 新增记录 -->
+	<insert id="insert" parameterType="com.noisyle.springdemo.admin.entity.User"
+		useGeneratedKeys="true" keyProperty="id">
+		insert into demo_user(name,loginname,password)
+		values(#{name},#{loginname},#{password})
+	</insert>
+	<!-- 查询单条记录 -->
+	<select id="get" parameterType="int" resultType="com.noisyle.springdemo.admin.entity.User">
+		select * from demo_user where id = #{id}
+	</select>
+	<!-- 修改记录 -->
+	<update id="update" parameterType="com.noisyle.springdemo.admin.entity.User">
+		update demo_user set name = #{name}, loginname = #{loginname}, password = #{password}
+		where id = #{id}
+	</update>
+	<!-- 查询所有记录 -->
+	<select id="select" resultType="com.noisyle.springdemo.admin.entity.User">
+		select * from demo_user
+	</select>
+	<!-- 删除记录 -->
+	<delete id="delete" parameterType="int">
+		delete from demo_user where id = #{id}
+	</delete>
+
+</mapper>  

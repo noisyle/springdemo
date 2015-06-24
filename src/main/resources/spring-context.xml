@@ -16,16 +16,8 @@
 	<context:component-scan base-package="com.noisyle.springdemo.**.dao" />
 
 	<!-- 加载属性文件 -->
-	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
-		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
-		<property name="ignoreResourceNotFound" value="true" />
-		<property name="ignoreUnresolvablePlaceholders" value="true" />
-		<property name="locations">
-			<list>
-				<value>classpath*:/spring-context.properties</value>
-			</list>
-		</property>
-	</bean>
+	<context:property-placeholder location="classpath*:/spring-context.properties"
+		system-properties-mode="OVERRIDE" ignore-resource-not-found="true" ignore-unresolvable="true" />
 	<!-- 加载属性文件 -->
 
 	<!-- 数据源配置 -->
@@ -60,6 +52,17 @@
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut" />
 	</aop:config>
 
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+        <property name="mapperLocations">
+        	<list>
+        		<value>classpath:database/${database.type}/admin/*.xml</value>
+        	</list>
+        </property>
+	</bean>
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
 
 	<bean id="SpringContextHolder" class="com.noisyle.springdemo.common.util.SpringContextHolder" />
 </beans>

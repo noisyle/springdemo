@@ -23,7 +23,7 @@ public class WebExceptionResolver implements HandlerExceptionResolver {
 			Exception ex) {
 
 		String uri = request.getRequestURI().toLowerCase();
-		logger.debug("url:{} 拦截到异常:{}", uri, ex);
+		logger.error("Controller中拦截到异常\n--method:\"{}\"\n--url:\"{}\"", object, uri, ex);
 		HandlerMethod method = (HandlerMethod) object;
 		ResponseBody annotation = method.getMethodAnnotation(ResponseBody.class);
 		if (annotation!=null) {
