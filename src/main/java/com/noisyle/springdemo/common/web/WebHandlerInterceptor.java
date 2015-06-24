@@ -17,7 +17,7 @@ public class WebHandlerInterceptor implements HandlerInterceptor {
 	 * 在调用controller具体方法前拦截
 	 */
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object object) throws Exception {
-		//ResourceHttpRequest 时不验证 WebContext的存在
+		//请求静态资源时不校验
 		if(object instanceof ResourceHttpRequestHandler){
 			return true;
 		}

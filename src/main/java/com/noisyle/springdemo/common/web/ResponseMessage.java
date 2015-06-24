@@ -2,13 +2,13 @@ package com.noisyle.springdemo.common.web;
 
 public class ResponseMessage {
 	/**
-	 * 业务提示信息
+	 * 返回信息对象
 	 */
 	private String content = "";
 	private long type = Type.NONE;
 
 	/**
-	 * 业务提示信息类型
+	 * 信息类型
 	 */
 	public static class Type {
 		final public static long NONE = 0;

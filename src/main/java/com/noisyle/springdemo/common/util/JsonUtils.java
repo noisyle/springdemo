@@ -6,13 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JsonUtils {
 	/**
-	 * 转换为json对象
-	 * @param obj
-	 * @return
+	 * 转换为json字符串
 	 */
 	public static String toJson(Object obj) {
-//		JSONObject jsonObject = JSONObject.fromObject(obj);
-//		String resultStr = String.valueOf(jsonObject);
 		ObjectMapper om = new ObjectMapper();
 		String resultStr = "";
 		try {
