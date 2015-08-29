@@ -5,23 +5,22 @@
 
 	<display-name>springdemo</display-name>
 
-	<servlet-mapping>
-		<servlet-name>default</servlet-name>
-		<url-pattern>/demo/*</url-pattern>
-	</servlet-mapping>
+	<!-- 配置shiro的核心拦截器 -->
+	<filter>
+		<filter-name>shiroFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+		<init-param>
+			<!-- 该值缺省为false,表示生命周期由SpringApplicationContext管理,设置为true则表示由ServletContainer管理 -->
+			<param-name>targetFilterLifecycle</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>shiroFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<!-- 配置shiro的核心拦截器 -->
 
-	<!-- CometD配置开始 -->
-	<servlet>
-		<servlet-name>cometd</servlet-name>
-		<servlet-class>org.cometd.server.CometDServlet</servlet-class>
-		<async-supported>true</async-supported>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>cometd</servlet-name>
-		<url-pattern>/cometd/*</url-pattern>
-	</servlet-mapping>
-	<!-- CometD配置结束 -->
-	
 	<!-- Spring配置开始 -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
@@ -31,6 +30,15 @@
 		<description>spring监听器</description>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
+	<filter>
+		<description>浏览器不支持put delete等method,由filter将/blog?_method=delete转换为标准的http delete方法</description>
+		<filter-name>HiddenHttpMethodFilter</filter-name>
+		<filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>HiddenHttpMethodFilter</filter-name>
+		<servlet-name>springmvc</servlet-name>
+	</filter-mapping>
 	<servlet>
 		<description>spring mvc拦截器</description>
 		<servlet-name>springmvc</servlet-name>
@@ -64,4 +72,17 @@
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
 	<!-- Spring配置结束 -->
+
+	<error-page>
+		<error-code>404</error-code>
+		<location>/error/404</location>
+	</error-page>
+	<error-page>
+		<error-code>500</error-code>
+		<location>/error/500</location>
+	</error-page>
+	<error-page>
+		<exception-type>java.lang.Throwable</exception-type>
+		<location>/error/500</location>
+	</error-page>
 </web-app>

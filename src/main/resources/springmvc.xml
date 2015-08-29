@@ -11,8 +11,16 @@
 	http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 	<mvc:resources mapping="/static/**" location="/WEB-INF/static_files/" />
-	<mvc:annotation-driven />
-	<context:component-scan base-package="com.noisyle.springdemo.**.controller" />
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="objectMapper">
+					<bean class="com.noisyle.crowbar.core.hibernate.HibernateAwareObjectMapper" />
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	<context:component-scan base-package="com.noisyle.crowbar.controller" />
 
 	<!-- Thymeleaf模板设置 -->
 	<bean id="templateResolver"
@@ -35,11 +43,18 @@
 	<!-- Thymeleaf模板设置 -->
 
 	<!-- 拦截器设置 -->
+	<bean id="webExceptionResolver" class="com.noisyle.crowbar.core.interceptor.WebExceptionResolver"/>
+
+	<!-- Controller产生异常后通用处理 -->
 	<mvc:interceptors>
 		<!-- Controller拦截器 -->
-		<bean class="com.noisyle.springdemo.common.web.WebHandlerInterceptor" />
+		<bean class="com.noisyle.crowbar.core.interceptor.WebHandlerInterceptor" />
+		<!-- Hibernate OpenSessionInView拦截器 -->
+		<bean class="org.springframework.orm.hibernate4.support.OpenSessionInViewInterceptor">
+			<property name="sessionFactory" ref="sessionFactory" />
+		</bean>
 	</mvc:interceptors>
-	
-	<!-- Controller产生异常后通用处理 -->
-	<bean id="webExceptionResolver" class="com.noisyle.springdemo.common.web.WebExceptionResolver"/>
+
+	<mvc:view-controller path="/error/404" view-name="error/404" />
+	<mvc:view-controller path="/error/500" view-name="error/500" />
 </beans>

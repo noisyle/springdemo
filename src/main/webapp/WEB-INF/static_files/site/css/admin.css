@@ -1,0 +1,26 @@
+body {
+  font-family: "微软雅黑","Microsoft YaHei",Arial,Helvetica,sans-serif,"宋体";
+  font-size: 120%;
+}
+.crow-main-tabs{
+	margin-bottom: 0;
+}
+.crow-main-tabs .tab-content{
+	padding: 0;
+}
+.nav-tabs-custom>.nav-tabs>li a {
+	padding: 7px 15px;
+	border-top: 0;
+}
+.crow-main-tabs>.nav-tabs i{
+	cursor: pointer;
+}
+.crow-main-tabs>.nav-tabs i:hover{
+	color: red;
+}
+.crow-main-tabs .tab-pane{
+	height: 100%;
+}
+.main-footer {
+	padding: 10px 15px;
+}

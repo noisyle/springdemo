@@ -2,18 +2,21 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:task="http://www.springframework.org/schema/task"
 	xsi:schemaLocation="
 	http://www.springframework.org/schema/beans 
 	http://www.springframework.org/schema/beans/spring-beans.xsd
 	http://www.springframework.org/schema/context 
 	http://www.springframework.org/schema/context/spring-context.xsd
 	http://www.springframework.org/schema/tx 
-	http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+	http://www.springframework.org/schema/tx/spring-tx.xsd
 	http://www.springframework.org/schema/aop 
-	http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+	http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/task 
+	http://www.springframework.org/schema/task/spring-task.xsd">
 
-	<context:component-scan base-package="com.noisyle.springdemo.**.service" />
-	<context:component-scan base-package="com.noisyle.springdemo.**.dao" />
+	<context:component-scan base-package="com.noisyle.crowbar.service" />
+	<context:component-scan base-package="com.noisyle.crowbar.repository" />
 
 	<!-- 加载属性文件 -->
 	<context:property-placeholder location="classpath*:/spring-context.properties"
@@ -24,45 +27,81 @@
 	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
 		<property name="driverClassName" value="${db.driverClassName}" />
 		<property name="url" value="${db.url}" />
-		<property name="defaultAutoCommit" value="false" />
+		<property name="username" value="${db.username}" />
+		<property name="password" value="${db.password}" />
 	</bean>
 	<!-- 数据源配置 -->
 
+	<!-- Hibernate4 配置-->
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan" value="com.noisyle.crowbar.model" />
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">${hibernate.dialect}</prop>
+				<prop key="hibernate.show_sql">${hibernate.show_sql}</prop>
+				<prop key="hibernate.format_sql">${hibernate.format_sql}</prop>
+			</props>
+		</property>
+	</bean>
+	<!-- Hibernate4 配置-->
+
 	<!-- 配置事务管理器 -->
+	<!-- JDBC事务管理器 -->
+	<!--
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
 		<property name="dataSource" ref="dataSource"></property>
 	</bean>
+	-->
+	<!-- Hibernate4 事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
 
+	<!-- 开启注解事务 -->
+	<tx:annotation-driven transaction-manager="transactionManager" />
 	<!-- 配置事务属性 -->
 	<tx:advice id="txAdvice" transaction-manager="transactionManager">
 		<tx:attributes>
 			<!-- 根据方法名指定事务的属性 -->
 			<tx:method name="*" />
-			<tx:method name="requiresNew*" propagation="REQUIRES_NEW" />
 			<tx:method name="get*" read-only="true" />
 			<tx:method name="find*" read-only="true" />
-
 		</tx:attributes>
 	</tx:advice>
 
 	<!-- 配置事务切入点，以及把事务切入点和事务属性关联起来 -->
 	<aop:config proxy-target-class="true">
-		<aop:pointcut expression="(execution(* com.noisyle.springdemo.*.service.*.*(..))) or (execution(* com.noisyle.springdemo.*.dao.*.*(..)))"
+		<aop:pointcut expression="(execution(* com.noisyle.crowbar.service.*.*(..))) or (execution(* com.noisyle.crowbar.repository.*.*(..)))"
 			id="txPointCut" />
 		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut" />
 	</aop:config>
 
-	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-		<property name="dataSource" ref="dataSource" />
-        <property name="mapperLocations">
-        	<list>
-        		<value>classpath:database/${db.type}/admin/*.xml</value>
-        	</list>
-        </property>
-	</bean>
-	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
-		<constructor-arg index="0" ref="sqlSessionFactory" />
-	</bean>
 
-	<bean id="SpringContextHolder" class="com.noisyle.springdemo.common.util.SpringContextHolder" />
+	<!-- 配置国际化资源文件路径 -->
+	<bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<!-- 定义消息资源文件的相对路径 -->
+			<list>
+				<value>i18n/message</value>
+			</list>
+		</property>
+	</bean>
+	<!-- 基于Cookie的本地化解析器 -->
+	<bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+		<property name="cookieMaxAge" value="604800" />
+		<property name="defaultLocale" value="zh_CN" />
+		<property name="cookieName" value="Language" />
+	</bean>
+	<!-- 基于Session的本地化解析器 -->
+	<!--<bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver" /> -->
+
+	<!-- 基于spring task的自动任务守护线程 -->
+	<bean id="daemonTask" class="com.noisyle.crowbar.core.task.DaemonTask" />
+	<task:scheduled-tasks>
+		<!-- 1分钟运行一次 -->
+		<task:scheduled ref="daemonTask" method="run" cron="0 * * * * ?" />
+	</task:scheduled-tasks>
+
+	<bean id="springContextHolder" class="com.noisyle.crowbar.core.util.SpringContextHolder" />
 </beans>

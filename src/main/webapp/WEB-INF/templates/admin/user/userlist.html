@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh">
+  <head>
+    <meta charset="UTF-8">
+    <title>Crowbar</title>
+    <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
+    <!-- Bootstrap -->
+    <link th:href="@{/static/bootstrap/css/bootstrap.min.css}" rel="stylesheet" />
+    <!-- Font Awesome Icons -->
+    <link th:href="@{/static/font-awesome/css/font-awesome.min.css}" rel="stylesheet" />
+    <!-- DATA TABLES -->
+    <link th:href="@{/static/datatables/css/dataTables.bootstrap.css}" rel="stylesheet" />
+    <!-- Theme style -->
+    <link th:href="@{/static/adminlte/css/AdminLTE.min.css}" rel="stylesheet" />
+    <!-- AdminLTE Skins. Choose a skin from the css/skins 
+         folder instead of downloading all of them to reduce the load. -->
+    <link th:href="@{/static/adminlte/css/skins/skin-blue.min.css}" rel="stylesheet" />
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script th:src="@{/static/html5shiv.min.js}"></script>
+      <script th:src="@{/static/respond.min.js}"></script>
+    <![endif]-->
+  </head>
+  <body class="skin-blue">
+
+    <section class="content-header">
+      <h1>
+        用户管理
+        <small>列表页面</small>
+      </h1>
+    </section>
+
+    <section class="content">
+
+      <div class="box">
+        <div class="box-header with-border">
+          <h3 class="box-title">用户列表</h3>
+        </div>
+
+        <div class="box-body">
+            <table id="example1" class="table table-hover table-striped table-bordered table-condensed" cellspacing="0" width="100%">
+              <thead>
+                <tr>
+                  <th>id</th>
+                  <th>用户名称</th>
+                  <th>登录名</th>
+                  <th></th>
+                </tr>
+              </thead>
+            </table>
+        </div>
+
+      </div>
+
+    </section>
+          
+    <script th:inline="javascript">
+    	var info = {
+    		contextPath: /*[[${#httpServletRequest.getContextPath()}]]*/ ''
+    	};
+    </script>
+    <!-- jQuery -->
+    <script th:src="@{/static/jquery/jquery-1.11.2.min.js}"></script>
+    <!-- Bootstrap JS -->
+    <script th:src="@{/static/bootstrap/js/bootstrap.min.js}"></script>
+    <!-- DATA TABES SCRIPT -->
+    <script th:src="@{/static/datatables/js/jquery.dataTables.js}"></script>
+    <script th:src="@{/static/datatables/js/dataTables.bootstrap.js}"></script>
+    <!-- FastClick -->
+    <script th:src="@{/static/adminlte/plugins/fastclick/fastclick.min.js}"></script>
+    <!-- 一些公用函数 -->
+    <script th:src="@{/static/utils.js}"></script>
+    
+    <script>
+	$(function() {
+		$('#example1').DataTable({
+			ajax : {
+				url: info.contextPath + '/admin/user/list',
+				data: {}
+			},
+			serverSide: true,
+			columns : [
+				{data : "id"},
+				{data : "name"},
+				{data : "loginName"},
+				{data : null}
+			],
+            columnDefs: [{
+		        targets: -1,
+		        render: function (a, b, c, d) {
+		            var html = " ";
+		            html += '<button type="button" class="btn btn-primary btn-xs" onclick="alert(\'' + c.name + '\')">修改</button> ';
+		            html += '<button type="button" class="btn btn-danger btn-xs" onclick="alert(\'' + c.name + '\')">删除</button> ';
+		            return html;
+		        }
+		    }]
+		});
+	});
+</script>
+  </body>
+</html>

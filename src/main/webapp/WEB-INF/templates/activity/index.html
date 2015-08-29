@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>攒局儿</title>
+  <link th:href="@{/static/bootstrap/css/bootstrap.min.css}" rel="stylesheet" />
+  <!--[if lt IE 9]>
+  <script th:src="@{/static/angular/html5shiv.min.js}"></script>
+  <script th:src="@{/static/angular/respond.min.js}"></script>
+  <![endif]-->
+  <style>
+    body {
+    padding-top: 70px;
+    font-family: "Helvetica Neue", Helvetica, Arial, "Hiragino Sans GB", "Hiragino Sans GB W3", "WenQuanYi Micro Hei", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+    }
+  </style>
+</head>
+
+<body ng-app="mainApp">
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#/">攒局儿</a>
+    </div>
+    <div id="navbar" ng-controller="LoginController" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#/">首页</a></li>
+        <li><a href="#/about">关于</a></li>
+      </ul>
+      <form class="navbar-form navbar-right" name="loginform" ng-hide="logined">
+        <div class="form-group" ng-class="{'has-error':username_invalid}">
+          <input type="text" placeholder="用户名" class="form-control" name="username" ng-model="username" ng-trim="true" required>
+        </div>
+        <div class="form-group" ng-class="{'has-error':password_invalid}">
+          <input type="password" placeholder="密码" class="form-control" name="password" ng-model="password" ng-trim="true" required>
+        </div>
+        <a href="javascript:;" role="button" class="btn btn-success" ng-click="login()">登录</a>
+      </form>
+      <ul class="nav navbar-nav navbar-right" ng-show="logined">
+        <li class="dropdown">
+          <a href="/#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{username}} <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="javascript:;" role="button">功能1</a></li>
+            <li><a href="javascript:;" role="button">功能2</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="javascript:;" role="button" ng-click="logout()">退出</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="main container" ng-view></div>
+
+<script th:src="@{/static/angular/angular.min.js}"></script>
+<script th:src="@{/static/angular/angular-route.min.js}"></script>
+<script th:src="@{/static/jquery/jquery-1.11.2.min.js}"></script>
+<script th:src="@{/static/bootstrap/js/bootstrap.min.js}"></script>
+<script th:src="@{/static/site/js/activity.js}"></script>
+
+<script type="text/ng-template" id="main.html">
+  <div class="jumbotron">
+    <h1>Navbar example</h1>
+    <p>This example is a quick exercise to illustrate how the default, static and fixed to top navbar work. It includes the responsive CSS and HTML, so it also adapts to your viewport and device.</p>
+    <p>To see the difference between static and fixed top navbars, just scroll.</p>
+    <p>
+      <a class="btn btn-lg btn-default" href="#/list" role="button">我想参加活动</a>
+      <a class="btn btn-lg btn-primary" href="#/add" role="button">我想发起活动 &raquo;</a>
+    </p>
+  </div>
+  <div class="row">
+    <div class="col-md-6" ng-repeat="activity in activities">
+      <h4 ng-bind="activity.title"></h4>
+      <p ng-bind="activity.content"></p>
+      <p><a class="btn btn-default" href="#/act{{activity.id}}" role="button">查看详细 &raquo;</a></p>
+    </div>
+  </div>
+</script>
+<script type="text/ng-template" id="list.html">
+  <div class="page-header"><h2>用户列表</h2></div>
+  <table class="table table-bordered table-hover table-condensed">
+    <thead>
+    <tr>
+      <td>主题</td>
+      <td>内容</td>
+      <td style="width:100px;">
+        <a role="button" href="#/add" class="btn btn-success btn-xs">发起</a>
+        <a role="button" href="#/" class="btn btn-default btn-xs">返回</a>
+      </td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="activity in activities">
+      <td ng-bind="activity.title"></td>
+      <td ng-bind="activity.content"></td>
+      <td>
+        <a class="btn btn-primary btn-xs" role="button" href="#/act{{activity.id}}">查看</a>
+        <a class="btn btn-danger btn-xs" role="button" ng-click="del(activity.id)">删除</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</script>
+<script type="text/ng-template" id="add.html">
+  <div class="page-header"><h2>发起新活动 </h2></div>
+  <form class="form-horizontal">
+    <div class="form-group">
+      <label class="col-sm-2 control-label">题目</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" placeholder="给你的活动起个名字" ng-model="activity.title" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">内容</label>
+      <div class="col-sm-10">
+        <textarea class="form-control" placeholder="介绍一下你的活动" ng-model="activity.content"></textarea>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">开始时间</label>
+      <div class="col-sm-10">
+        <input type="text" class="form-control" placeholder="选择活动开始的时间" ng-model="activity.startdate" />
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"> 立即发布
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <a role="button" class="btn btn-primary" ng-click="save()">确定</a>
+        <a role="button" class="btn btn-default" href="#/">返回</a>
+      </div>
+    </div>
+  </form>
+</script>
+<script type="text/ng-template" id="detail.html">
+  <div class="page-header"><h2>发布中的活动</h2></div>
+  <form class="form-horizontal" method="post">
+    <div class="form-group">
+      <label class="col-sm-2 control-label">主题</label>
+      <div class="col-sm-10">
+        <p type="text" class="form-control-static" ng-bind="activity.title" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">内容</label>
+      <div class="col-sm-10">
+        <p class="form-control-static" ng-bind="activity.content" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="col-sm-2 control-label">开始时间</label>
+      <div class="col-sm-10">
+        <p type="text" class="form-control-static" ng-bind="activity.startdate" />
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <a role="button" class="btn btn-default" href="#/">返回</a>
+      </div>
+    </div>
+  </form>
+</script>
+<script>
+
+</script>
+</body>
+</html>
