@@ -1,15 +1,16 @@
 package com.noisyle.crowbar.repository;
 
-import com.noisyle.crowbar.core.base.AbstractDao;
-import com.noisyle.crowbar.model.Activity;
+import java.util.List;
+
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.noisyle.crowbar.core.base.AbstractDao;
+import com.noisyle.crowbar.model.Activity;
 
 @Repository("activityDao")
 public class ActivityDao extends AbstractDao<Activity, Long> {
     public List<Activity> list() {
-        List<Activity> list = createQuery("from Activity where status=1").list();
+        List<Activity> list = find("from Activity where status=1");
         return list;
     }
 }

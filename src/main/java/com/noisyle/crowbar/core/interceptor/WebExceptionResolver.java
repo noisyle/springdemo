@@ -1,22 +1,22 @@
 package com.noisyle.crowbar.core.interceptor;
 
-import com.noisyle.crowbar.core.exception.GeneralException;
-import com.noisyle.crowbar.core.util.SpringContextHolder;
-import com.noisyle.crowbar.core.vo.ResponseData;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import com.noisyle.crowbar.core.exception.GeneralException;
+import com.noisyle.crowbar.core.util.SpringContextHolder;
+import com.noisyle.crowbar.core.vo.ResponseData;
 
 public class WebExceptionResolver implements HandlerExceptionResolver {
 

@@ -9,7 +9,9 @@ import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
  * Created by wangyue on 2015/8/16.
  */
 public class HibernateAwareObjectMapper extends ObjectMapper {
-    public HibernateAwareObjectMapper() {
+	private static final long serialVersionUID = 6633954021310384140L;
+
+	public HibernateAwareObjectMapper() {
         Hibernate4Module module = new Hibernate4Module();
         module.configure(Hibernate4Module.Feature.FORCE_LAZY_LOADING, true);
         registerModule(module);
